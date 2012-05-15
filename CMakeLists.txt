@@ -1,0 +1,14 @@
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+PROJECT (DWD-CONVERTER)
+
+SET (SOURCES
+	main.cpp
+	# File1.h
+	# File1.cpp
+)
+
+# INCLUDE_DIRECTORIES(...)
+
+ADD_EXECUTABLE(dwd-converter ${SOURCES})
+
+# TARGET_LINK_LIBRARIES(dwd-converter ...)
