@@ -38,12 +38,12 @@ bool TimeSpan::isEmpty()
         return false;
 }
 
-QDate TimeSpan::setStartDate(QDate date)
+void TimeSpan::setStartDate(QDate date)
 {
     this->startDate = date;
 }
 
-QDate TimeSpan::setEndDate(QDate date)
+void TimeSpan::setEndDate(QDate date)
 {
     this->endDate = date;
 }
