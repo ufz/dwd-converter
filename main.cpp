@@ -12,15 +12,15 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
 
     //Check command line paramters
-    if(argc != 8)
+    if(argc != 7)
     {
         qDebug() << "Parameters must be"                    << endl
+                 << "path to output folder"                 << endl
                  << "path to folder pressure"               << endl
                  << "path to folder relative humidity "     << endl
                  << "path to folder average temperature"    << endl
                  << "path to folder max temperature"        << endl
                  << "path to folder min temperature"        << endl
-                 << "path to output folder"                 << endl
                  << "Dont Mess Up The Order!"               << endl << endl
                  << "Programm EXIT";
         exit(1);
@@ -37,11 +37,11 @@ int main(int argc, char *argv[])
 
     QRegExp dateRx("[0-9]{4}\\-[0-9]{2}\\-[0-9]{2}");
 
-    givenFolders.insert("pre", argv[1]);
-    givenFolders.insert("rh", argv[2]);
-    givenFolders.insert("tem", argv[3]);
-    givenFolders.insert("tmax", argv[4]);
-    givenFolders.insert("tmin", argv[5]);
+    givenFolders.insert("pre", argv[2]);
+    givenFolders.insert("rh", argv[3]);
+    givenFolders.insert("tem", argv[4]);
+    givenFolders.insert("tmax", argv[5]);
+    givenFolders.insert("tmin", argv[6]);
     iGivenFoldersForStations.operator =(givenFolders);
     iGivenFoldersForData.operator =(givenFolders);
 
@@ -54,6 +54,9 @@ int main(int argc, char *argv[])
     */
     while(iGivenFoldersForStations.hasNext())
     {
+        qDebug() << "Switch to folder"
+                 << iGivenFoldersForStations.peekNext().value()
+                 << "for station extraction" << endl;
         QFile stationsFile(iGivenFoldersForStations.peekNext().value()
                                + "StationLuT_all.txt");
 
@@ -83,133 +86,138 @@ int main(int argc, char *argv[])
             while(iStationsFileLine.hasNext())
                 iStationsFileLine.next().simplified();
 
-            //Check if the current line of the stations file is a data line
-            if(stationsFileLine.first().contains(QRegExp("^\\d+")) )
+            if(!stationsFileLine.isEmpty())
             {
-                s = Station(stationsFileLine);
-
-                //Check if the current station was not worked before
-                //(StationLuT_all.txt file from previous folder)
-                if(!extractedStations.contains(s.getID()))
+                //Check if the current line of the stations file is a data line
+                if(stationsFileLine.first().contains(QRegExp("^\\d+")) )
                 {
-                    //Put station ID into list of stations
-                    extractedStations.append(s.getID());
+                    s = Station(stationsFileLine);
 
-                    qDebug() << "Start data extraction for station"
-                             << s.getID();
-
-                    //Iterate over all folders to get every measure type for
-                    //the current station
-                    iGivenFoldersForData.toFront();
-                    while(iGivenFoldersForData.hasNext())
+                    //Check if the current station was not worked before
+                    //(StationLuT_all.txt file from previous folder)
+                    if(!extractedStations.contains(s.getID()))
                     {
-                        //Extract data for current station
-                        QFile dataFile(iGivenFoldersForData.peekNext().value()
-                                       + s.getID() + ".dat");
-                        dataFile.open(QIODevice::ReadOnly);
+                        //Put station ID into list of stations
+                        extractedStations.append(s.getID());
 
-                        if(dataFile.exists())
+                        qDebug() << "Start data extraction for station"
+                                 << s.getID();
+
+                        //Iterate over all folders to get every measure type for
+                        //the current station
+                        iGivenFoldersForData.toFront();
+                        while(iGivenFoldersForData.hasNext())
                         {
-                            qDebug() << "Extracting data from file"
-                                     << dataFile.fileName();
+                            qDebug() << "Switching to folder"
+                                     << iGivenFoldersForData.peekNext().value()
+                                     << "for data extraction";
+                            //Extract data for current station
+                            QFile dataFile(iGivenFoldersForData.peekNext().value()
+                                           + s.getID() + ".dat");
+                            dataFile.open(QIODevice::ReadOnly);
 
-                            //Extract measure values and the related time span
-                            while(!dataFile.atEnd())
+                            if(dataFile.exists())
                             {
-                                dataFileLine = QString::fromAscii(dataFile.readLine());
-                                dataFileLine = dataFileLine.simplified();
+                                qDebug() << "Extracting data from file"
+                                         << dataFile.fileName();
 
-                                //Check if the current line is a data line
-                                if(dataFileLine.contains(QRegExp("^(\\-)?\\d+")))
+                                //Extract measure values and the related time span
+                                while(!dataFile.atEnd())
                                 {
+                                    dataFileLine = QString::fromAscii(dataFile.readLine());
                                     dataFileLine = dataFileLine.simplified();
 
-                                    //Put values to the related measure type
-                                    if(iGivenFoldersForData.peekNext().key() == "pre")
-                                        s.getPressure()->append(dataFileLine);
-                                    else if (iGivenFoldersForData.peekNext().key() == "rh")
-                                        s.getRelativeHumidity()->append(dataFileLine);
-                                    else if (iGivenFoldersForData.peekNext().key() == "tem")
-                                        s.getAverageTemperature()->append(dataFileLine);
-                                    else if (iGivenFoldersForData.peekNext().key() == "tmax")
-                                        s.getMaxTemperature()->append(dataFileLine);
-                                    else if (iGivenFoldersForData.peekNext().key() == "tmin")
-                                        s.getMinTemperature()->append(dataFileLine);
-                                    else
-                                        qDebug() << "Unknow data class"
-                                                 << iGivenFoldersForData.peekNext().key();
-                                }else{ //Line is a header line
-                                    //Extract time span if its the right line
-                                    if(dataFileLine.contains(dateRx))
+                                    //Check if the current line is a data line
+                                    if(dataFileLine.contains(QRegExp("^(\\-)?\\d+")))
                                     {
-                                        timeSpan = dataFileLine.split(" ");
-                                        timeSpan.removeAt(2);
-                                        timeSpan.removeAt(0);
-                                        startDate = timeSpan.at(0);
-                                        startDate = startDate.remove(0, 2);
-                                        endDate = timeSpan.at(1);
-                                        endDate = endDate.remove(0,2);
+                                        dataFileLine = dataFileLine.simplified();
 
-                                        //Put time span to the related measure type
+                                        //Put values to the related measure type
                                         if(iGivenFoldersForData.peekNext().key() == "pre")
-                                            s.setTimeSpanPressure(startDate, endDate);
+                                            s.getPressure()->append(dataFileLine);
                                         else if (iGivenFoldersForData.peekNext().key() == "rh")
-                                            s.setTimeSpanRelativeHumidity(startDate,
-                                                                                endDate);
+                                            s.getRelativeHumidity()->append(dataFileLine);
                                         else if (iGivenFoldersForData.peekNext().key() == "tem")
-                                            s.setTimeSpanAverageTemperature(startDate,
-                                                                                  endDate);
+                                            s.getAverageTemperature()->append(dataFileLine);
                                         else if (iGivenFoldersForData.peekNext().key() == "tmax")
-                                            s.setTimeSpanMaxTemperature(startDate,
-                                                                              endDate);
+                                            s.getMaxTemperature()->append(dataFileLine);
                                         else if (iGivenFoldersForData.peekNext().key() == "tmin")
-                                            s.setTimeSpanMinTemperature(startDate,
-                                                                              endDate);
+                                            s.getMinTemperature()->append(dataFileLine);
+                                        else
+                                            qDebug() << "Unknow data class"
+                                                     << iGivenFoldersForData.peekNext().key();
+                                    }else{ //Line is a header line
+                                        //Extract time span if its the right line
+                                        if(dataFileLine.contains(dateRx))
+                                        {
+                                            timeSpan = dataFileLine.split(" ");
+                                            timeSpan.removeAt(2);
+                                            timeSpan.removeAt(0);
+                                            startDate = timeSpan.at(0);
+                                            startDate = startDate.remove(0, 2);
+                                            endDate = timeSpan.at(1);
+                                            endDate = endDate.remove(0,2);
+
+                                            //Put time span to the related measure type
+                                            if(iGivenFoldersForData.peekNext().key() == "pre")
+                                                s.setTimeSpanPressure(startDate, endDate);
+                                            else if (iGivenFoldersForData.peekNext().key() == "rh")
+                                                s.setTimeSpanRelativeHumidity(startDate,
+                                                                                    endDate);
+                                            else if (iGivenFoldersForData.peekNext().key() == "tem")
+                                                s.setTimeSpanAverageTemperature(startDate,
+                                                                                      endDate);
+                                            else if (iGivenFoldersForData.peekNext().key() == "tmax")
+                                                s.setTimeSpanMaxTemperature(startDate,
+                                                                                  endDate);
+                                            else if (iGivenFoldersForData.peekNext().key() == "tmin")
+                                                s.setTimeSpanMinTemperature(startDate,
+                                                                                  endDate);
+                                        }
                                     }
                                 }
-                            }
-                            dataFile.close();
-                        }else
-                            qDebug() << "Station" << s.getID()
-                                     << "has no measurement values in"
-                                     << iGivenFoldersForData.peekNext().value();
+                                dataFile.close();
+                            }else
+                                qDebug() << "Station" << s.getID()
+                                         << "has no measurement values in"
+                                         << iGivenFoldersForData.peekNext().value();
 
-                        iGivenFoldersForData.next();
-                    }
-
-                    if(s.isConsistent())
-                    {
-                        s.generateMissingMeasureTypes();
-                        s.generateMissingValues();
-                        s.writeFile(argv[6]);
-                    }else{
-                        qDebug() << "Inconsistencies in station" << s.getID() << "detected -> Writing to log file" << argv[7];
-
-                        QFile error(argv[7]);
-                        error.open(QIODevice::WriteOnly | QIODevice::Append);
-                        QTextStream tsOut(&error);
-
-                        if(!stationsFile.exists()){
-                            qDebug() << "No file" << error.fileName()
-                                     << "found -> EXIT" << endl;
-                            exit(1);
+                            iGivenFoldersForData.next();
                         }
 
-                        tsOut << s.toQString() << "\n";
-                        error.close();
+                        if(s.isConsistent())
+                        {
+                            s.generateMissingMeasureTypes();
+                            s.generateMissingValues();
+                            s.writeFile(argv[1]);
+                        }else{
+                            qDebug() << "Inconsistencies in station" << s.getID()
+                                     << "detected -> Writing to log file";
+
+                            QFile error(QString(argv[1]) + "errorLog.txt");
+                            error.open(QIODevice::WriteOnly | QIODevice::Append);
+                            QTextStream tsOut(&error);
+
+                            if(!stationsFile.exists()){
+                                qDebug() << "No file" << error.fileName()
+                                         << "found -> EXIT" << endl;
+                                exit(1);
+                            }
+
+                            tsOut << s.toQString() << "\n";
+                            error.close();
+                        }
                     }
-
-
                 }
             }
         }
         stationsFile.close();
 
-
         iGivenFoldersForData.toFront();
         iGivenFoldersForStations.next();
     }
 
+    qDebug() << "Data for" << extractedStations.size() << "stations successfully written";
 
     exit(0);
     return a.exec();

@@ -344,6 +344,7 @@ void Station::writeFile(QString path)
         qDebug() << "Could not create outputfile for" << this->ID << endl;
         exit(1);
     }
+    qDebug() << "Data for station" << this->getID() << "successfully written" << endl;
 }
 
 /*
@@ -359,13 +360,11 @@ void Station::generateMissingValues()
     {
         dif = this->getMinStartDate().daysTo(
                     this->timeSpanPressure.getStartDate());
-        qDebug() << dif;
         if(dif > 0)
             for(quint32 i = 0; i < dif; i++)
                 this->pressure.prepend("-9");
 
         dif = this->timeSpanPressure.getEndDate().daysTo(this->getMaxEndDate());
-        qDebug() << dif;
         if(dif > 0)
             for(quint32 i = 0; i < dif; i++)
                 this->pressure.append("-9");
@@ -373,7 +372,6 @@ void Station::generateMissingValues()
 
     if(this->relativeHumidity.size() < this->getMaxDayDif())
     {
-        qDebug() << this->relativeHumidity.size() << "rh";
         dif = this->getMinStartDate().daysTo(
                    this->timeSpanRelativeHumidity.getStartDate());
         if(dif > 0)
@@ -426,6 +424,8 @@ void Station::generateMissingValues()
             for(quint32 i = 0; i < dif; i++)
                 this->minTemperature.append("-999");
     }
+
+    qDebug() << "Missing values for station" << this->getID() << "successfully written";
 }
 
 /*
@@ -455,5 +455,7 @@ void Station::generateMissingMeasureTypes()
     if(this->minTemperature.isEmpty())
         for(int i = 0; i < this->getMaxDayDif(); i++)
             this->minTemperature.append("-999");
+
+    qDebug() << "Missing measure types for station" << this->getID() << "successfully written";
 }
 
