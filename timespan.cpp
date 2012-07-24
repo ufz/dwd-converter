@@ -1,5 +1,7 @@
 #include <timespan.h>
+#include <QRegExp>
 #include <QDebug>
+#include <QStringList>
 
 TimeSpan::TimeSpan()
 {
@@ -43,7 +45,21 @@ void TimeSpan::setStartDate(QDate date)
     this->startDate = date;
 }
 
+void TimeSpan::setStartDate(QString date) {
+    QStringList dateValues = date.split(QRegExp("\\D+"));
+    this->startDate = QDate(dateValues[0].toInt(),
+                            dateValues[1].toInt(),
+                            dateValues[2].toInt());
+}
+
 void TimeSpan::setEndDate(QDate date)
 {
     this->endDate = date;
+}
+
+void TimeSpan::setEndDate(QString date) {
+    QStringList dateValues = date.split(QRegExp("\\D+"));
+    this->endDate = QDate(dateValues[0].toInt(),
+                          dateValues[1].toInt(),
+                          dateValues[2].toInt());
 }

@@ -16,12 +16,12 @@ SET (SOURCES
 	timespan.cpp
 	values.h
 	values.cpp
-	weatherstation.h
-	weatherstation.cpp
 )
 
 INCLUDE_DIRECTORIES( . )
 
 ADD_EXECUTABLE(dwd-converter ${SOURCES})
+
+ADD_DEFINITIONS( -DQT_NO_DEBUG_OUTPUT )
 
 TARGET_LINK_LIBRARIES(dwd-converter ${QT_LIBRARIES})

@@ -40,38 +40,29 @@ QString Station::getID()
     return this->ID;
 }
 
-/*
-  Returns informations of the station
-*/
-QString Station::toQString()
+QList<QString>* Station::getPressure()
 {
-    return QString("\nStat_ID: " + this->ID +
-                   "\nState: " + this->state +
-                   "\nStation_Name: " + this->stationName +
-                   this->values.toQString() +
-                   this->magnitudes.toQString() +
-                   "\nBl_ID: " + this->blID +
-                   "\nTime span pressure:" +
-                   this->timeSpanPressure.toQString() +
-                   "\nTime span relative humidity:" +
-                   this->timeSpanRelativeHumidity.toQString() +
-                   "\nTime span average temperature" +
-                   this->timeSpanAverageTemperature.toQString() +
-                   "\nTime span max temperature" +
-                   this->timeSpanMaxTemperature.toQString() +
-                   "\nTime span min temperature" +
-                   this->timeSpanMinTemperature.toQString() +
-                   "\nPressure size:" +
-                   QString().setNum(this->pressure.size()) +
-                   "\nRelative humidity size:" +
-                   QString().setNum(this->relativeHumidity.size()) +
-                   "\nAverage temperature:" +
-                   QString().setNum(this->averageTemperature.size()) +
-                   "\nMax temperature:" +
-                   QString().setNum(this->maxTemperature.size()) +
-                   "\nMin temperature:" +
-                   QString().setNum(this->minTemperature.size()) +
-                   "\n");
+    return &this->pressure;
+}
+
+QList<QString>* Station::getRelativeHumidity()
+{
+    return &this->relativeHumidity;
+}
+
+QList<QString>* Station::getAverageTemperature()
+{
+    return &this->averageTemperature;
+}
+
+QList<QString>* Station::getMaxTemperature()
+{
+    return &this->maxTemperature;
+}
+
+QList<QString>* Station::getMinTemperature()
+{
+    return &this->minTemperature;
 }
 
 TimeSpan* Station::getTimeSpanPressure()
@@ -97,14 +88,6 @@ TimeSpan* Station::getTimeSpanMaxTemperature()
 TimeSpan* Station::getTimeSpanMinTemperature()
 {
     return &this->timeSpanMinTemperature;
-}
-
-/*
-  Returns difference between minStartDate and maxEndDate
-*/
-qint32 Station::getMaxDayDif()
-{
-    return this->getMinStartDate().daysTo(this->getMaxEndDate()) + 1;
 }
 
 void Station::setTimeSpanPressure(QString startDate, QString endDate)
@@ -137,42 +120,74 @@ void Station::setTimeSpanMinTemperature(QString startDate, QString endDate)
                               generateQDateFromQString(endDate));
 }
 
-QDate generateQDateFromQString(QString dateString)
-{
-    QStringList dateValues   = dateString.split(QRegExp("\\D+"));
-    return QDate(dateValues[0].toInt(),
-                 dateValues[1].toInt(),
-                 dateValues[2].toInt());
+void Station::setID(QString id) {
+    this->ID = id;
 }
 
-QList<QString>* Station::getPressure()
+void Station::setPressure(QStringList values)
 {
-    return &this->pressure;
+    this->pressure = values;
 }
 
-QList<QString>* Station::getRelativeHumidity()
+void Station::setRelativeHumidity(QStringList values)
 {
-    return &this->relativeHumidity;
+    this->relativeHumidity = values;
 }
 
-QList<QString>* Station::getAverageTemperature()
+void Station::setAverageTemperature(QStringList values)
 {
-    return &this->averageTemperature;
+    this->averageTemperature = values;
 }
 
-QList<QString>* Station::getMaxTemperature()
+void Station::setMaxTemperature(QStringList values)
 {
-    return &this->maxTemperature;
+    this->maxTemperature = values;
 }
 
-QList<QString>* Station::getMinTemperature()
+void Station::setMinTemperature(QStringList values)
 {
-    return &this->minTemperature;
+    this->minTemperature = values;
 }
 
-/*
-  Returns the earlies date on wihich a value was measured
-*/
+//return information about this station
+QString Station::toQString()
+{
+    return QString("\nStat_ID: " + this->ID +
+                   "\nState: " + this->state +
+                   "\nStation_Name: " + this->stationName +
+                   this->values.toQString() +
+                   this->magnitudes.toQString() +
+                   "\nBl_ID: " + this->blID +
+                   "\nTime span pressure:" +
+                   this->timeSpanPressure.toQString() +
+                   "\nTime span relative humidity:" +
+                   this->timeSpanRelativeHumidity.toQString() +
+                   "\nTime span average temperature" +
+                   this->timeSpanAverageTemperature.toQString() +
+                   "\nTime span max temperature" +
+                   this->timeSpanMaxTemperature.toQString() +
+                   "\nTime span min temperature" +
+                   this->timeSpanMinTemperature.toQString() +
+                   "\nPressure size:" +
+                   QString().setNum(this->pressure.size()) +
+                   "\nRelative humidity size:" +
+                   QString().setNum(this->relativeHumidity.size()) +
+                   "\nAverage temperature:" +
+                   QString().setNum(this->averageTemperature.size()) +
+                   "\nMax temperature:" +
+                   QString().setNum(this->maxTemperature.size()) +
+                   "\nMin temperature:" +
+                   QString().setNum(this->minTemperature.size()) +
+                   "\n");
+}
+
+//return difference between minStartDate and maxEndDate
+qint32 Station::getMaxDayDif()
+{
+    return this->getMinStartDate().daysTo(this->getMaxEndDate()) + 1;
+}
+
+//return the earlies date on which a value was measured
 QDate Station::getMinStartDate()
 {
     QDate date;
@@ -215,9 +230,7 @@ QDate Station::getMinStartDate()
     return date;
 }
 
-/*
-  Returns the latest date on which a value was measured
-*/
+//return the latest date on which a value was measured
 QDate Station::getMaxEndDate()
 {
     QDate date;
@@ -261,9 +274,7 @@ QDate Station::getMaxEndDate()
     return date;
 }
 
-/*
- Checks if this station has any inconsistencies
-*/
+//check if this station has any inconsistencies
 bool Station::isConsistent()
 {
     //Check if the timespan of a measure type is equal to the amount of values
@@ -294,15 +305,13 @@ bool Station::isConsistent()
     return true;
 }
 
-/*
-  Write station to file with the given path
-*/
+//write station to file with the given path
 void Station::writeFile(QString path)
 {
     QDate date;
 
-    QFile outputFile(path + this->ID + ".csv");
-    outputFile.open(QIODevice::WriteOnly | QIODevice::Append);
+    QFile outputFile(path);
+    outputFile.open(QIODevice::WriteOnly);
     QTextStream tsOut(&outputFile);
 
     if(outputFile.exists())
@@ -312,8 +321,8 @@ void Station::writeFile(QString path)
                  << "to" << outputFile.fileName();
 
         //Write header
-        tsOut << "DWDI_"    << this->ID << "\n";
-        tsOut << "Nr"       << ","
+        tsOut << "DWDI_"    << this->ID << "\n"
+              << "Nr"       << ","
               << "date"     << ","
               << "pre"      << ","
               << "rh"       << ","
@@ -347,9 +356,7 @@ void Station::writeFile(QString path)
     qDebug() << "Data for station" << this->getID() << "successfully written" << endl;
 }
 
-/*
-  Generates values for measure types which are not given between minStartDate and maxEndDate
-*/
+//generate values for measure types which are not given between minStartDate and maxEndDate
 void Station::generateMissingValues()
 {
     qDebug() << "Generate missing values for station" << this->getID();
@@ -428,9 +435,7 @@ void Station::generateMissingValues()
     qDebug() << "Missing values for station" << this->getID() << "successfully written";
 }
 
-/*
-  Generates missing values for empty measure types
-*/
+//generate missing values for empty measure types
 void Station::generateMissingMeasureTypes()
 {
     qDebug() << "Generate missing measure types for station" << this->getID();
@@ -459,3 +464,10 @@ void Station::generateMissingMeasureTypes()
     qDebug() << "Missing measure types for station" << this->getID() << "successfully written";
 }
 
+QDate generateQDateFromQString(QString dateString)
+{
+    QStringList dateValues = dateString.split(QRegExp("\\D+"));
+    return QDate(dateValues[0].toInt(),
+                 dateValues[1].toInt(),
+                 dateValues[2].toInt());
+}

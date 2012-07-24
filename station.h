@@ -29,6 +29,14 @@ public:
     QDate getMaxEndDate();
     qint32 getMaxDayDif();
 
+    void setID(QString id);
+
+    void setPressure(QStringList values);
+    void setRelativeHumidity(QStringList values);
+    void setAverageTemperature(QStringList values);
+    void setMaxTemperature(QStringList values);
+    void setMinTemperature(QStringList values);
+
     void setTimeSpanPressure(QString startDate, QString endDate);
     void setTimeSpanRelativeHumidity(QString startDate, QString endDate);
     void setTimeSpanAverageTemperature(QString startDate, QString endDate);

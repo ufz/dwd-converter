@@ -13,7 +13,9 @@ public:
     QDate getEndDate();
 
     void setStartDate(QDate date);
+    void setStartDate(QString date);
     void setEndDate(QDate date);
+    void setEndDate(QString date);
 
     bool isEmpty();
 
