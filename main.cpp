@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
         }
 
         //TODO change path
-        s.writeFile("/home/robby/Desktop/test/result.csv");
+        s.writeFile(argv[1]);
 
         exit(0);
     }else{
