@@ -9,15 +9,15 @@
 
 //generate output message for wrong input
 void wrongInput() {
-    qDebug() << "Parameters must be"    << endl << endl
+    qDebug() << "Parameters should be"    << endl << endl
              << "For a single station:" << endl
              << "---------------------" << endl
              << "Station file (.csv) followed by pre|rh|tem|tmax|tmin and the corresponding measure files (.dat)" << endl
-             << "For example: ~/Desktop/04474.csv tmax ~/Desktop/tmax/04474.dat tmin ~/Desktop/tmin/04474.dat" << endl << endl
+             << "For example: dwd-converter ~/Desktop/04474.csv tmax ~/Desktop/tmax/04474.dat tmin ~/Desktop/tmin/04474.dat" << endl << endl
              << "For a set of files:"   << endl
              << "-------------------"   << endl
              << "Output folder followed by pre|rh|tem|tmax|tmin and the corresponding measure folders" << endl
-             << "For example: ~/Desktop/results/ tmax ~/Desktop/tmax/ tmin ~/Desktop/tmin/" << endl << endl
+             << "For example: dwd-converter ~/Desktop/results/ tmax ~/Desktop/tmax/ tmin ~/Desktop/tmin/" << endl << endl
              << "Programm Exit";
     exit(1);
 }
